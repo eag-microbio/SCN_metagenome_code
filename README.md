@@ -2,65 +2,87 @@
 Workflow for SCN Illumina NovaSeq metagenomes
 
 
-#7-26-23
-#Moved all the metagenome files to the directory " /local/workdir/eag252/cystmetagenome_all"
 
 fastqc *.fastq.gz -t 40
 
 #Received new fastq files of SR and SS for the "mid" samples. I need to concat the two sets together. 
 cat SR_S14_L002_R1_001.fastq.gz SR-LTRMidCysts-3-6-23_S2_L003_R1_001.fastq.gz > SR_Mid_R1_001.fastq.gz
+
 cat SR_S14_L002_R2_001.fastq.gz SR-LTRMidCysts-3-6-23_S2_L003_R2_001.fastq.gz > SR_Mid_R2_001.fastq.gz
+
 cat SS_S12_L002_R1_001.fastq.gz SS-LTRMidCysts-3-6-23_S1_L003_R1_001.fastq.gz > SS_Mid_R1_001.fastq.gz
+
 cat SS_S12_L002_R2_001.fastq.gz SS-LTRMidCysts-3-6-23_S1_L003_R2_001.fastq.gz > SS_Mid_R2_001.fastq.gz
 
 fastqc SR_Mid* -t 40
 fastqc SS_Mid* -t 40
 
-#The sequence lengths are variable (35-151) and the Per base sequence content of the frist 14ish basepairs are not good.  
-#First, only include reads that are >150 bp
-#CGI prepared with NexteraXT, remove nextera adapters even though fastqc says there aren't any issues with adapters, then remove the ~16bp from the reads. the "pt" means paired & trimmed.   
-#start 7-27-23
-#remove adapters and then trim to even length
+#### The sequence lengths are variable (35-151) and the Per base sequence content of the frist 14ish basepairs are not good.  
+#### First, only include reads that are >150 bp
+#### CGI prepared with NexteraXT, remove nextera adapters, then remove the ~16bp from the reads. the "pt" means paired & trimmed.   
+
+#### Remove adapters and then trim to even length
 java -jar /programs/trimmomatic/trimmomatic-0.39.jar PE -threads 20 -phred33 S3_S11_L002_R1_001.fastq.gz S3_S11_L002_R2_001.fastq.gz S3cystsmid_p_R1.fastq.gz S3cystsmid_u_R1.fastq.gz S3cystsmid_p_R2.fastq.gz S3cystsmid_u_R2.fastq.gz ILLUMINACLIP:/programs/trimmomatic/adapters/NexteraPE-PE.fa:2:30:10 LEADING:3 TRAILING:3 SLIDINGWINDOW:4:15 MINLEN:150
+
 java -jar /programs/trimmomatic/trimmomatic-0.39.jar PE -threads 40 -phred33 SA_S13_L002_R1_001.fastq.gz SA_S13_L002_R2_001.fastq.gz SAcystsmid_p_R1.fastq.gz SAcystsmid_u_R1.fastq.gz SAcystsmid_p_R2.fastq.gz SAcystsmid_u_R2.fastq.gz ILLUMINACLIP:/programs/trimmomatic/adapters/NexteraPE-PE.fa:2:30:10 LEADING:3 TRAILING:3 SLIDINGWINDOW:4:15 MINLEN:150
+
 java -jar /programs/trimmomatic/trimmomatic-0.39.jar PE -threads 40 -phred33 SR_Mid_R1_001.fastq.gz SR_Mid_R2_001.fastq.gz SRcystsmid_p_R1.fastq.gz SRcystsmid_u_R1.fastq.gz SRcystsmid_p_R2.fastq.gz SRcystsmid_u_R2.fastq.gz ILLUMINACLIP:/programs/trimmomatic/adapters/NexteraPE-PE.fa:2:30:10 LEADING:3 TRAILING:3 SLIDINGWINDOW:4:15 MINLEN:150
+
 java -jar /programs/trimmomatic/trimmomatic-0.39.jar PE -threads 40 -phred33 SS_Mid_R1_001.fastq.gz SS_Mid_R2_001.fastq.gz SScystsmid_p_R1.fastq.gz SScystsmid_u_R1.fastq.gz SScystsmid_p_R2.fastq.gz SScystsmid_u_R2.fastq.gz ILLUMINACLIP:/programs/trimmomatic/adapters/NexteraPE-PE.fa:2:30:10 LEADING:3 TRAILING:3 SLIDINGWINDOW:4:15 MINLEN:150
+
 java -jar /programs/trimmomatic/trimmomatic-0.39.jar PE -threads 40 -phred33 S3-LTR-Fall-Cysts-5-31-23_S6_L003_R1_001.fastq.gz S3-LTR-Fall-Cysts-5-31-23_S6_L003_R2_001.fastq.gz S3cystsfall_p_R1.fastq.gz S3cystsfall_u_R1.fastq.gz S3cystsfall_p_R2.fastq.gz S3cystsfall_u_R2.fastq.gz ILLUMINACLIP:/programs/trimmomatic/adapters/NexteraPE-PE.fa:2:30:10 LEADING:3 TRAILING:3 SLIDINGWINDOW:4:15 MINLEN:150
+
 java -jar /programs/trimmomatic/trimmomatic-0.39.jar PE -threads 40 -phred33 SA-LTR-Fall-Cysts-5-31-23_S5_L003_R1_001.fastq.gz SA-LTR-Fall-Cysts-5-31-23_S5_L003_R2_001.fastq.gz SAcystsfall_p_R1.fastq.gz SAcystsfall_u_R1.fastq.gz SAcystsfall_p_R2.fastq.gz SAcystsfall_u_R2.fastq.gz ILLUMINACLIP:/programs/trimmomatic/adapters/NexteraPE-PE.fa:2:30:10 LEADING:3 TRAILING:3 SLIDINGWINDOW:4:15 MINLEN:150
+
 java -jar /programs/trimmomatic/trimmomatic-0.39.jar PE -threads 40 -phred33 SR-LTR-Fall-Cysts-5-31-23_S3_L003_R1_001.fastq.gz SR-LTR-Fall-Cysts-5-31-23_S3_L003_R2_001.fastq.gz SRcystsfall_p_R1.fastq.gz SRcystsfall_u_R1.fastq.gz SRcystsfall_p_R2.fastq.gz SRcystsfall_u_R2.fastq.gz ILLUMINACLIP:/programs/trimmomatic/adapters/NexteraPE-PE.fa:2:30:10 LEADING:3 TRAILING:3 SLIDINGWINDOW:4:15 MINLEN:150
+
 java -jar /programs/trimmomatic/trimmomatic-0.39.jar PE -threads 40 -phred33 SS-LTR-Fall-Cysts-5-31-23_S4_L003_R1_001.fastq.gz SS-LTR-Fall-Cysts-5-31-23_S4_L003_R2_001.fastq.gz SScystsfall_p_R1.fastq.gz SScystsfall_u_R1.fastq.gz SScystsfall_p_R2.fastq.gz SScystsfall_u_R2.fastq.gz ILLUMINACLIP:/programs/trimmomatic/adapters/NexteraPE-PE.fa:2:30:10 LEADING:3 TRAILING:3 SLIDINGWINDOW:4:15 MINLEN:150
 
 
-#Then remove the ~16bp from the reads
+#### remove the ~16bp from the reads
 java -jar /programs/trimmomatic/trimmomatic-0.39.jar SE -threads 40 -phred33 S3cystsmid_p_R1.fastq.gz S3cystsmid_pt_R1.fastq.gz HEADCROP:16
+
 java -jar /programs/trimmomatic/trimmomatic-0.39.jar SE -threads 40 -phred33 S3cystsmid_p_R2.fastq.gz S3cystsmid_pt_R2.fastq.gz HEADCROP:16
+
 java -jar /programs/trimmomatic/trimmomatic-0.39.jar SE -threads 40 -phred33 SAcystsmid_p_R1.fastq.gz SAcystsmid_pt_R1.fastq.gz HEADCROP:16
+
 java -jar /programs/trimmomatic/trimmomatic-0.39.jar SE -threads 40 -phred33 SAcystsmid_p_R2.fastq.gz SAcystsmid_pt_R2.fastq.gz HEADCROP:16
+
 java -jar /programs/trimmomatic/trimmomatic-0.39.jar SE -threads 40 -phred33 SRcystsmid_p_R1.fastq.gz SRcystsmid_pt_R1.fastq.gz HEADCROP:16
+
 java -jar /programs/trimmomatic/trimmomatic-0.39.jar SE -threads 40 -phred33 SRcystsmid_p_R2.fastq.gz SRcystsmid_pt_R2.fastq.gz HEADCROP:16
+
 java -jar /programs/trimmomatic/trimmomatic-0.39.jar SE -threads 40 -phred33 SScystsmid_p_R1.fastq.gz SScystsmid_pt_R1.fastq.gz HEADCROP:16
+
 java -jar /programs/trimmomatic/trimmomatic-0.39.jar SE -threads 40 -phred33 SScystsmid_p_R2.fastq.gz SScystsmid_pt_R2.fastq.gz HEADCROP:16
+
 java -jar /programs/trimmomatic/trimmomatic-0.39.jar SE -threads 40 -phred33 S3cystsfall_p_R1.fastq.gz S3cystsfall_pt_R1.fastq.gz HEADCROP:16
+
 java -jar /programs/trimmomatic/trimmomatic-0.39.jar SE -threads 40 -phred33 S3cystsfall_p_R2.fastq.gz S3cystsfall_pt_R2.fastq.gz HEADCROP:16
+
 java -jar /programs/trimmomatic/trimmomatic-0.39.jar SE -threads 40 -phred33 SAcystsfall_p_R1.fastq.gz SAcystsfall_pt_R1.fastq.gz HEADCROP:16
+
 java -jar /programs/trimmomatic/trimmomatic-0.39.jar SE -threads 40 -phred33 SAcystsfall_p_R2.fastq.gz SAcystsfall_pt_R2.fastq.gz HEADCROP:16
+
 java -jar /programs/trimmomatic/trimmomatic-0.39.jar SE -threads 40 -phred33 SRcystsfall_p_R1.fastq.gz SRcystsfall_pt_R1.fastq.gz HEADCROP:16
+
 java -jar /programs/trimmomatic/trimmomatic-0.39.jar SE -threads 40 -phred33 SRcystsfall_p_R2.fastq.gz SRcystsfall_pt_R2.fastq.gz HEADCROP:16
+
 java -jar /programs/trimmomatic/trimmomatic-0.39.jar SE -threads 40 -phred33 SScystsfall_p_R1.fastq.gz SScystsfall_pt_R1.fastq.gz HEADCROP:16
+
 java -jar /programs/trimmomatic/trimmomatic-0.39.jar SE -threads 40 -phred33 SScystsfall_p_R2.fastq.gz SScystsfall_pt_R2.fastq.gz HEADCROP:16
 
-#fastqc on things
+### run fastqc 
 fastqc *_pt_R1.fastq.gz
+
 fastqc *_pt_R2.fastq.gz
 
-#remove the _p_R* files and the _u_R* files. 
-#finished 7-28-23
 
 
-#Use bowtie to remove both the SCN and soybean reads from the raw files. 
-#Found this website: https://www.metagenomics.wiki/tools/short-read/remove-host-sequences & https://paleogenomics-course.readthedocs.io/en/latest/4_ReadsMapping_v2.html
-#Reference Nematode genome: GenBank assembly accession:GCA_004148225.2 (latest), https://www.ncbi.nlm.nih.gov/assembly/GCA_004148225.2
-#Soybean genome used: https://www.ncbi.nlm.nih.gov/assembly/GCA_022114995.1
+#### Use bowtie to remove both the SCN and soybean reads from the raw files. 
+#### Found this website: https://www.metagenomics.wiki/tools/short-read/remove-host-sequences & https://paleogenomics-course.readthedocs.io/en/latest/4_ReadsMapping_v2.html
+#### Reference Nematode genome: GenBank assembly accession:GCA_004148225.2 (latest), https://www.ncbi.nlm.nih.gov/assembly/GCA_004148225.2
+#### Soybean genome used: https://www.ncbi.nlm.nih.gov/assembly/GCA_022114995.1
 
 #### concat files together for a database: https://www.metagenomics.wiki/tools/bowtie2/index
 cat GCA_022114995.1_ASM2211499v1_genomic.fna GCA_004148225.2_ASM414822v2_genomic.fna > scn_sb_genomes.fna
@@ -70,12 +92,19 @@ A) bowtie2 mapping against host sequence, create bowtie2 database using a refere
 
 #### bowtie2 mapping against host sequence database, keep both aligned and unaligned reads (paired-end reads)
 /programs/bowtie2-2.4.5-linux-x86_64/bowtie2 -p 12 -x scn_sb_DB -1 S3cystsmid_pt_R1.fastq.gz -2 S3cystsmid_pt_R2.fastq.gz -S S3cystsmid_mapped_and_unmapped.sam
+
 /programs/bowtie2-2.4.5-linux-x86_64/bowtie2 -p 12 -x scn_sb_DB -1 SAcystsmid_pt_R1.fastq.gz -2 SAcystsmid_pt_R2.fastq.gz -S SAcystsmid_mapped_and_unmapped.sam
+
 /programs/bowtie2-2.4.5-linux-x86_64/bowtie2 -p 12 -x scn_sb_DB -1 SRcystsmid_pt_R1.fastq.gz -2 SRcystsmid_pt_R2.fastq.gz -S SRcystsmid_mapped_and_unmapped.sam
+
 /programs/bowtie2-2.4.5-linux-x86_64/bowtie2 -p 12 -x scn_sb_DB -1 SScystsmid_pt_R1.fastq.gz -2 SScystsmid_pt_R2.fastq.gz -S SScystsmid_mapped_and_unmapped.sam
+
 /programs/bowtie2-2.4.5-linux-x86_64/bowtie2 -p 12 -x scn_sb_DB -1 S3cystsfall_pt_R1.fastq.gz -2 S3cystsfall_pt_R2.fastq.gz -S S3cystsfall_mapped_and_unmapped.sam
+
 /programs/bowtie2-2.4.5-linux-x86_64/bowtie2 -p 12 -x scn_sb_DB -1 SAcystsfall_pt_R1.fastq.gz -2 SAcystsfall_pt_R2.fastq.gz -S SAcystsfall_mapped_and_unmapped.sam
+
 /programs/bowtie2-2.4.5-linux-x86_64/bowtie2 -p 12 -x scn_sb_DB -1 SRcystsfall_pt_R1.fastq.gz -2 SRcystsfall_pt_R2.fastq.gz -S SRcystsfall_mapped_and_unmapped.sam
+
 /programs/bowtie2-2.4.5-linux-x86_64/bowtie2 -p 12 -x scn_sb_DB -1 SScystsfall_pt_R1.fastq.gz -2 SScystsfall_pt_R2.fastq.gz -S SScystsfall_mapped_and_unmapped.sam
 #OUT PUT OF OVERALL ALIGNMENT RATE
 
@@ -103,45 +132,76 @@ A) bowtie2 mapping against host sequence, create bowtie2 database using a refere
 #### sort bam file by read name ( -n ) to have paired reads next to each other (8 parallel threads, each using up to 5G memory)
 #C) split paired-end reads into separated fastq files.
 /programs/samtools-1.15.1-r/bin/samtools sort -n -m 5G -@ 12 S3cystsmid_bothReadsUnmapped.bam -o S3cystsmid_bothReadsUnmapped_sorted.bam
+
 /programs/samtools-1.15.1-r/bin/samtools fastq -@ 12 S3cystsmid_bothReadsUnmapped_sorted.bam -1 S3cystsmid_R1.fastq.gz -2 S3cystsmid_R2.fastq.gz -0 /dev/null -s /dev/null -n
+
 /programs/samtools-1.15.1-r/bin/samtools sort -n -m 5G -@ 12 SAcystsmid_bothReadsUnmapped.bam -o SAcystsmid_bothReadsUnmapped_sorted.bam
+
 /programs/samtools-1.15.1-r/bin/samtools fastq -@ 12 SAcystsmid_bothReadsUnmapped_sorted.bam -1 SAcystsmid_R1.fastq.gz -2 SAcystsmid_R2.fastq.gz -0 /dev/null -s /dev/null -n
+
 /programs/samtools-1.15.1-r/bin/samtools sort -n -m 5G -@ 12 SRcystsmid_bothReadsUnmapped.bam -o SRcystsmid_bothReadsUnmapped_sorted.bam
+
 /programs/samtools-1.15.1-r/bin/samtools fastq -@ 12 SRcystsmid_bothReadsUnmapped_sorted.bam -1 SRcystsmid_R1.fastq.gz -2 SRcystsmid_R2.fastq.gz -0 /dev/null -s /dev/null -n
+
 /programs/samtools-1.15.1-r/bin/samtools sort -n -m 5G -@ 12 SScystsmid_bothReadsUnmapped.bam -o SScystsmid_bothReadsUnmapped_sorted.bam
+
 /programs/samtools-1.15.1-r/bin/samtools fastq -@ 12 SScystsmid_bothReadsUnmapped_sorted.bam -1 SScystsmid_R1.fastq.gz -2 SScystsmid_R2.fastq.gz -0 /dev/null -s /dev/null -n
+
 /programs/samtools-1.15.1-r/bin/samtools sort -n -m 5G -@ 12 S3cystsfall_bothReadsUnmapped.bam -o S3cystsfall_bothReadsUnmapped_sorted.bam
+
 /programs/samtools-1.15.1-r/bin/samtools fastq -@ 12 S3cystsfall_bothReadsUnmapped_sorted.bam -1 S3cystsfall_R1.fastq.gz -2 S3cystsfall_R2.fastq.gz -0 /dev/null -s /dev/null -n
+
 /programs/samtools-1.15.1-r/bin/samtools sort -n -m 5G -@ 12 SAcystsfall_bothReadsUnmapped.bam -o SAcystsfall_bothReadsUnmapped_sorted.bam
+
 /programs/samtools-1.15.1-r/bin/samtools fastq -@ 12 SAcystsfall_bothReadsUnmapped_sorted.bam -1 SAcystsfall_R1.fastq.gz -2 SAcystsfall_R2.fastq.gz -0 /dev/null -s /dev/null -n
+
 /programs/samtools-1.15.1-r/bin/samtools sort -n -m 5G -@ 12 SRcystsfall_bothReadsUnmapped.bam -o SRcystsfall_bothReadsUnmapped_sorted.bam
+
 /programs/samtools-1.15.1-r/bin/samtools fastq -@ 12 SRcystsfall_bothReadsUnmapped_sorted.bam -1 SRcystsfall_R1.fastq.gz -2 SRcystsfall_R2.fastq.gz -0 /dev/null -s /dev/null -n
+
 /programs/samtools-1.15.1-r/bin/samtools sort -n -m 5G -@ 8 SScystsfall_bothReadsUnmapped.bam -o SScystsfall_bothReadsUnmapped_sorted.bam
+
 /programs/samtools-1.15.1-r/bin/samtools fastq -@ 8 SScystsfall_bothReadsUnmapped_sorted.bam -1 SScystsfall_R1.fastq.gz -2 SScystsfall_R2.fastq.gz -0 /dev/null -s /dev/null -n
 
 
 ### Assemble with megahit, Below was put in to bash script. megahitassembly.sh
 #!/bin/bash
 /programs/MEGAHIT-1.2.9-Linux-x86_64-static/bin/megahit -t 40 -1 S3cystsmid_pt_R1.fastq.gz -2 S3cystsmid_pt_R2.fastq.gz -o S3_Midassembly --out-prefix S3_mid
+
 /programs/MEGAHIT-1.2.9-Linux-x86_64-static/bin/megahit -t 40 -1 SAcystsmid_pt_R1.fastq.gz -2 SAcystsmid_pt_R2.fastq.gz -o SA_Midassembly --out-prefix SA_mid
+
 /programs/MEGAHIT-1.2.9-Linux-x86_64-static/bin/megahit -t 40 -1 SRcystsmid_pt_R1.fastq.gz -2 SRcystsmid_pt_R2.fastq.gz -o SR_Midassembly --out-prefix SR_mid
+
 /programs/MEGAHIT-1.2.9-Linux-x86_64-static/bin/megahit -t 40 -1 SScystsmid_pt_R1.fastq.gz -2 SScystsmid_pt_R2.fastq.gz -o SS_Midassembly --out-prefix SS_mid
+
 /programs/MEGAHIT-1.2.9-Linux-x86_64-static/bin/megahit -t 40 -1 S3cystsfall_pt_R1.fastq.gz -2 S3cystsfall_pt_R2.fastq.gz -o S3_Fallassembly --out-prefix S3_fall
+
 /programs/MEGAHIT-1.2.9-Linux-x86_64-static/bin/megahit -t 40 -1 SAcystsfall_pt_R1.fastq.gz -2 SAcystsfall_pt_R2.fastq.gz -o SA_Fallassembly --out-prefix SA_fall
+
 /programs/MEGAHIT-1.2.9-Linux-x86_64-static/bin/megahit -t 40 -1 SRcystsfall_pt_R1.fastq.gz -2 SRcystsfall_pt_R2.fastq.gz -o SR_Fallassembly --out-prefix SR_fall
+
 /programs/MEGAHIT-1.2.9-Linux-x86_64-static/bin/megahit -t 40 -1 SScystsfall_pt_R1.fastq.gz -2 SScystsfall_pt_R2.fastq.gz -o SS_Fallassembly --out-prefix SS_fall
 
 
 ### Quast on assembly
 export PYTHONPATH=/programs/quast-5.2.0/lib64/python3.9/site-packages:/programs/quast-5.2.0/lib/python3.9/site-packages
+
 export PATH=/programs/quast-5.2.0/bin:$PATH
+
 quast.py S3_Midassembly/S3_mid.contigs.fa --threads 32 -o S3_Midassembly/S3_Mid_quast
+
 quast.py SA_Midassembly/SA_mid.contigs.fa --threads 32 -o SA_Midassembly/SA_Mid_quast
+
 quast.py SR_Midassembly/SR_mid.contigs.fa --threads 32 -o SR_Midassembly/SR_Mid_quast
+
 quast.py SS_Midassembly/SS_mid.contigs.fa --threads 32 -o SS_Midassembly/SS_Mid_quast
+
 quast.py S3_Fallassembly/S3_fall.contigs.fa --threads 32 -o S3_Fallassembly/S3_Fall_quast
+
 quast.py SA_Fallassembly/SA_fall.contigs.fa --threads 32 -o SA_Fallassembly/SA_Fall_quast
+
 quast.py SR_Fallassembly/SR_fall.contigs.fa --threads 32 -o SR_Fallassembly/SR_Fall_quast
+
 quast.py SS_Fallassembly/SS_fall.contigs.fa --threads 32 -o SS_Fallassembly/SS_Fall_quast
 
 
@@ -158,12 +218,19 @@ quast.py SS_Fallassembly/SS_fall.contigs.fa --threads 32 -o SS_Fallassembly/SS_F
 
 ### Quast on filtered assembly 
 quast.py S3_Midassembly/S3_midfilt.contigs.fa --threads 32 -o S3_Midassembly/S3_Mid_quastfilt
+
 quast.py SA_Midassembly/SA_midfilt.contigs.fa --threads 32 -o SA_Midassembly/SA_Mid_quastfilt
+
 quast.py SR_Midassembly/SR_midfilt.contigs.fa --threads 32 -o SR_Midassembly/SR_Mid_quastfilt
+
 quast.py SS_Midassembly/SS_midfilt.contigs.fa --threads 32 -o SS_Midassembly/SS_Mid_quastfilt
+
 quast.py S3_Fallassembly/S3_fallfilt.contigs.fa --threads 32 -o S3_Fallassembly/S3_Fall_quastfilt
+
 quast.py SA_Fallassembly/SA_fallfilt.contigs.fa --threads 32 -o SA_Fallassembly/SA_Fall_quastfilt
+
 quast.py SR_Fallassembly/SR_fallfilt.contigs.fa --threads 32 -o SR_Fallassembly/SR_Fall_quastfilt
+
 quast.py SS_Fallassembly/SS_fallfilt.contigs.fa --threads 32 -o SS_Fallassembly/SS_Fall_quastfilt
 
 
@@ -174,12 +241,19 @@ cat GCA_022114995.1_ASM2211499v1_genomic.fna GCA_004148225.2_ASM414822v2_genomic
 makeblastdb -in soybeanscngenomes.fasta -parse_seqids -dbtype nucl  -title SBSCNgenome -out SBSCNDB
 
 /programs/ncbi-blast-2.9.0+/bin/blastn -db SBSCNDB -query S3_Midassembly/S3_midfilt.contigs.fa -out S3_Midassembly/S3_midfilt.results -outfmt "6 qseqid sseqid pident length qstart qend sstart send evalue bitscore staxids sscinames sskingdoms stitle" -max_target_seqs 3 -max_hsps 1 -num_threads 40
+
 /programs/ncbi-blast-2.9.0+/bin/blastn -db SBSCNDB -query SA_Midassembly/SA_midfilt.contigs.fa -out SA_Midassembly/SA_midfilt.results -outfmt "6 qseqid sseqid pident length qstart qend sstart send evalue bitscore staxids sscinames sskingdoms stitle" -max_target_seqs 3 -max_hsps 1 -num_threads 40
+
 /programs/ncbi-blast-2.9.0+/bin/blastn -db SBSCNDB -query SR_Midassembly/SR_midfilt.contigs.fa -out SR_Midassembly/SR_midfilt.results -outfmt "6 qseqid sseqid pident length qstart qend sstart send evalue bitscore staxids sscinames sskingdoms stitle" -max_target_seqs 3 -max_hsps 1 -num_threads 40
+
 /programs/ncbi-blast-2.9.0+/bin/blastn -db SBSCNDB -query SS_Midassembly/SS_midfilt.contigs.fa -out SS_Midassembly/SS_midfilt.results -outfmt "6 qseqid sseqid pident length qstart qend sstart send evalue bitscore staxids sscinames sskingdoms stitle" -max_target_seqs 3 -max_hsps 1 -num_threads 40
+
 /programs/ncbi-blast-2.9.0+/bin/blastn -db SBSCNDB -query S3_Fallassembly/S3_fallfilt.contigs.fa -out S3_Fallassembly/S3_fallfilt.results -outfmt "6 qseqid sseqid pident length qstart qend sstart send evalue bitscore staxids sscinames sskingdoms stitle" -max_target_seqs 3 -max_hsps 1 -num_threads 40
+
 /programs/ncbi-blast-2.9.0+/bin/blastn -db SBSCNDB -query SA_Fallassembly/SA_fallfilt.contigs.fa -out SA_Fallassembly/SA_fallfilt.results -outfmt "6 qseqid sseqid pident length qstart qend sstart send evalue bitscore staxids sscinames sskingdoms stitle" -max_target_seqs 3 -max_hsps 1 -num_threads 40
+
 /programs/ncbi-blast-2.9.0+/bin/blastn -db SBSCNDB -query SR_Fallassembly/SR_fallfilt.contigs.fa -out SR_Fallassembly/SR_fallfilt.results -outfmt "6 qseqid sseqid pident length qstart qend sstart send evalue bitscore staxids sscinames sskingdoms stitle" -max_target_seqs 3 -max_hsps 1 -num_threads 40
+
 /programs/ncbi-blast-2.9.0+/bin/blastn -db SBSCNDB -query SS_Fallassembly/SS_fallfilt.contigs.fa -out SS_Fallassembly/SS_fallfilt.results -outfmt "6 qseqid sseqid pident length qstart qend sstart send evalue bitscore staxids sscinames sskingdoms stitle" -max_target_seqs 3 -max_hsps 1 -num_threads 40
 
 
@@ -188,12 +262,19 @@ module load python/3.10.6
 
 ### Remove contigs that hit to soybean or scn genome
 python filter_fasta_by_list_of_headers.py S3_Midassembly/S3_midfilt.contigs.fa S3_Midassembly/S3_mid_contigstoremove.txt > S3_Midassembly/S3_midfilt2.fa
+
 python filter_fasta_by_list_of_headers.py SA_Midassembly/SA_midfilt.contigs.fa SA_Midassembly/SA_mid_contigstoremove.txt > SA_Midassembly/SA_midfilt2.fa
+
 python filter_fasta_by_list_of_headers.py SR_Midassembly/SR_midfilt.contigs.fa SR_Midassembly/SR_mid_contigstoremove.txt > SR_Midassembly/SR_midfilt2.fa
+
 python filter_fasta_by_list_of_headers.py SS_Midassembly/SS_midfilt.contigs.fa SS_Midassembly/SS_mid_contigstoremove.txt > SS_Midassembly/SS_midfilt2.fa
+
 python filter_fasta_by_list_of_headers.py S3_Fallassembly/S3_fallfilt.contigs.fa S3_Fallassembly/S3_fall_contigstoremove.txt > S3_Fallassembly/S3_fallfilt2.fa
+
 python filter_fasta_by_list_of_headers.py SA_Fallassembly/SA_fallfilt.contigs.fa SA_Fallassembly/SA_fall_contigstoremove.txt > SA_Fallassembly/SA_fallfilt2.fa
+
 python filter_fasta_by_list_of_headers.py SR_Fallassembly/SR_fallfilt.contigs.fa SR_Fallassembly/SR_fall_contigstoremove.txt > SR_Fallassembly/SR_fallfilt2.fa
+
 python filter_fasta_by_list_of_headers.py SS_Fallassembly/SS_fallfilt.contigs.fa SS_Fallassembly/SS_fall_contigstoremove.txt > SS_Fallassembly/SS_fallfilt2.fa
 
 ### filter_fasta_by_list_of_headers.py
@@ -217,61 +298,104 @@ if len(header_set) != 0:
 
 #### Quast on filtered assembly
 quast.py S3_Midassembly/S3_midfilt2.fa --threads 32 -o S3_Midassembly/S3_Mid_quastfilt2
+
 quast.py SA_Midassembly/SA_midfilt2.fa --threads 32 -o SA_Midassembly/SA_Mid_quastfilt2
+
 quast.py SR_Midassembly/SR_midfilt2.fa --threads 32 -o SR_Midassembly/SR_Mid_quastfilt2
+
 quast.py SS_Midassembly/SS_midfilt2.fa --threads 32 -o SS_Midassembly/SS_Mid_quastfilt2
+
 quast.py S3_Fallassembly/S3_fallfilt2.fa --threads 32 -o S3_Fallassembly/S3_Fall_quastfilt2
+
 quast.py SA_Fallassembly/SA_fallfilt2.fa --threads 32 -o SA_Fallassembly/SA_Fall_quastfilt2
+
 quast.py SR_Fallassembly/SR_fallfilt2.fa --threads 32 -o SR_Fallassembly/SR_Fall_quastfilt2
+
 quast.py SS_Fallassembly/SS_fallfilt2.fa --threads 32 -o SS_Fallassembly/SS_Fall_quastfilt2
 
 ### eukrep to separate eukaryotic and prokaryotic contigs
 singularity run --bind $PWD --pwd $PWD /programs/EukRep-0.6.7/eukrep.sif EukRep -i S3_Midassembly/S3_midfilt2.fa -o S3_Midassembly/S3_mideuk.fasta --prokarya S3_Midassembly/S3_midprok.fasta
+
 singularity run --bind $PWD --pwd $PWD /programs/EukRep-0.6.7/eukrep.sif EukRep -i SA_Midassembly/SA_midfilt2.fa -o SA_Midassembly/SA_mideuk.fasta --prokarya SA_Midassembly/SA_midprok.fasta
+
 singularity run --bind $PWD --pwd $PWD /programs/EukRep-0.6.7/eukrep.sif EukRep -i SR_Midassembly/SR_midfilt2.fa -o SR_Midassembly/SR_mideuk.fasta --prokarya SR_Midassembly/SR_midprok.fasta
+
 singularity run --bind $PWD --pwd $PWD /programs/EukRep-0.6.7/eukrep.sif EukRep -i SS_Midassembly/SS_midfilt2.fa -o SS_Midassembly/SS_mideuk.fasta --prokarya SS_Midassembly/SS_midprok.fasta
+
 singularity run --bind $PWD --pwd $PWD /programs/EukRep-0.6.7/eukrep.sif EukRep -i S3_Fallassembly/S3_fallfilt2.fa -o S3_Fallassembly/S3_falleuk.fasta --prokarya S3_Fallassembly/S3_fallprok.fasta
+
 singularity run --bind $PWD --pwd $PWD /programs/EukRep-0.6.7/eukrep.sif EukRep -i SA_Fallassembly/SA_fallfilt2.fa -o SA_Fallassembly/SA_falleuk.fasta --prokarya SA_Fallassembly/SA_fallprok.fasta
+
 singularity run --bind $PWD --pwd $PWD /programs/EukRep-0.6.7/eukrep.sif EukRep -i SR_Fallassembly/SR_fallfilt2.fa -o SR_Fallassembly/SR_falleuk.fasta --prokarya SR_Fallassembly/SR_fallprok.fasta
+
 singularity run --bind $PWD --pwd $PWD /programs/EukRep-0.6.7/eukrep.sif EukRep -i SS_Fallassembly/SS_fallfilt2.fa -o SS_Fallassembly/SS_falleuk.fasta --prokarya SS_Fallassembly/SS_fallprok.fasta
 
 #### Quast on euk and prok fasta's
 quast.py S3_Midassembly/S3_mideuk.fasta --threads 32 -o S3_Midassembly/S3_Mid_quasteuk
-quast.py SA_Midassembly/SA_mideuk.fasta --threads 32 -o SA_Midassembly/SA_Mid_quasteuk
-quast.py SR_Midassembly/SR_mideuk.fasta --threads 32 -o SR_Midassembly/SR_Mid_quasteuk
-quast.py SS_Midassembly/SS_mideuk.fasta --threads 32 -o SS_Midassembly/SS_Mid_quasteuk
-quast.py S3_Midassembly/S3_midprok.fasta --threads 32 -o S3_Midassembly/S3_Mid_quastprok
-quast.py SA_Midassembly/SA_midprok.fasta --threads 32 -o SA_Midassembly/SA_Mid_quastprok
-quast.py SR_Midassembly/SR_midprok.fasta --threads 32 -o SR_Midassembly/SR_Mid_quastprok
-quast.py SS_Midassembly/SS_midprok.fasta --threads 32 -o SS_Midassembly/SS_Mid_quastprok
-quast.py S3_Fallassembly/S3_falleuk.fasta --threads 32 -o S3_Fallassembly/S3_Fall_quasteuk
-quast.py SA_Fallassembly/SA_falleuk.fasta --threads 32 -o SA_Fallassembly/SA_Fall_quasteuk
-quast.py SR_Fallassembly/SR_falleuk.fasta --threads 32 -o SR_Fallassembly/SR_Fall_quasteuk
-quast.py SS_Fallassembly/SS_falleuk.fasta --threads 32 -o SS_Fallassembly/SS_Fall_quasteuk
-quast.py S3_Fallassembly/S3_fallprok.fasta --threads 32 -o S3_Fallassembly/S3_Fall_quastprok
-quast.py SA_Fallassembly/SA_fallprok.fasta --threads 32 -o SA_Fallassembly/SA_Fall_quastprok
-quast.py SR_Fallassembly/SR_fallprok.fasta --threads 32 -o SR_Fallassembly/SR_Fall_quastprok
-quast.py SS_Fallassembly/SS_fallprok.fasta --threads 32 -o SS_Fallassembly/SS_Fall_quastprok
 
+quast.py SA_Midassembly/SA_mideuk.fasta --threads 32 -o SA_Midassembly/SA_Mid_quasteuk
+
+quast.py SR_Midassembly/SR_mideuk.fasta --threads 32 -o SR_Midassembly/SR_Mid_quasteuk
+
+quast.py SS_Midassembly/SS_mideuk.fasta --threads 32 -o SS_Midassembly/SS_Mid_quasteuk
+
+quast.py S3_Midassembly/S3_midprok.fasta --threads 32 -o S3_Midassembly/S3_Mid_quastprok
+
+quast.py SA_Midassembly/SA_midprok.fasta --threads 32 -o SA_Midassembly/SA_Mid_quastprok
+
+quast.py SR_Midassembly/SR_midprok.fasta --threads 32 -o SR_Midassembly/SR_Mid_quastprok
+
+quast.py SS_Midassembly/SS_midprok.fasta --threads 32 -o SS_Midassembly/SS_Mid_quastprok
+
+quast.py S3_Fallassembly/S3_falleuk.fasta --threads 32 -o S3_Fallassembly/S3_Fall_quasteuk
+
+quast.py SA_Fallassembly/SA_falleuk.fasta --threads 32 -o SA_Fallassembly/SA_Fall_quasteuk
+
+quast.py SR_Fallassembly/SR_falleuk.fasta --threads 32 -o SR_Fallassembly/SR_Fall_quasteuk
+
+quast.py SS_Fallassembly/SS_falleuk.fasta --threads 32 -o SS_Fallassembly/SS_Fall_quasteuk
+
+quast.py S3_Fallassembly/S3_fallprok.fasta --threads 32 -o S3_Fallassembly/S3_Fall_quastprok
+
+quast.py SA_Fallassembly/SA_fallprok.fasta --threads 32 -o SA_Fallassembly/SA_Fall_quastprok
+
+quast.py SR_Fallassembly/SR_fallprok.fasta --threads 32 -o SR_Fallassembly/SR_Fall_quastprok
+
+quast.py SS_Fallassembly/SS_fallprok.fasta --threads 32 -o SS_Fallassembly/SS_Fall_quastprok
 
 
 ### Anvio- use prokaryote file 
 anvi-script-reformat-fasta /workdir/cystmetagenome_all/S3_Midassembly/S3_midprok.fasta -o S3midprok-fixed.fa -l 0 --simplify-names
+
 anvi-script-reformat-fasta /workdir/cystmetagenome_all/SA_Midassembly/SA_midprok.fasta -o SAmidprok-fixed.fa -l 0 --simplify-names
+
 anvi-script-reformat-fasta /workdir/cystmetagenome_all/SR_Midassembly/SR_midprok.fasta -o SRmidprok-fixed.fa -l 0 --simplify-names
+
 anvi-script-reformat-fasta /workdir/cystmetagenome_all/SS_Midassembly/SS_midprok.fasta -o SSmidprok-fixed.fa -l 0 --simplify-names
+
 anvi-script-reformat-fasta /workdir/cystmetagenome_all/S3_Fallassembly/S3_fallprok.fasta -o S3fallprok-fixed.fa -l 0 --simplify-names
+
 anvi-script-reformat-fasta /workdir/cystmetagenome_all/SA_Fallassembly/SA_fallprok.fasta -o SAfallprok-fixed.fa -l 0 --simplify-names
+
 anvi-script-reformat-fasta /workdir/cystmetagenome_all/SR_Fallassembly/SR_fallprok.fasta -o SRfallprok-fixed.fa -l 0 --simplify-names
+
 anvi-script-reformat-fasta /workdir/cystmetagenome_all/SS_Fallassembly/SS_fallprok.fasta -o SSfallprok-fixed.fa -l 0 --simplify-names
 
+
 anvi-gen-contigs-database -f S3midprok-fixed.fa -o S3midprok.db --ignore-internal-stop-codons -n anviS3midprok --num-threads 40
+
 anvi-gen-contigs-database -f SAmidprok-fixed.fa -o SAmidprok.db --ignore-internal-stop-codons -n anviSAmidprok --num-threads 40
+
 anvi-gen-contigs-database -f SRmidprok-fixed.fa -o SRmidprok.db --ignore-internal-stop-codons -n anviSRmidprok --num-threads 40
+
 anvi-gen-contigs-database -f SSmidprok-fixed.fa -o SSmidprok.db --ignore-internal-stop-codons -n anviSSmidprok --num-threads 40
+
 anvi-gen-contigs-database -f S3fallprok-fixed.fa -o S3fallprok.db --ignore-internal-stop-codons -n anviS3fallprok --num-threads 40
+
 anvi-gen-contigs-database -f SAfallprok-fixed.fa -o SAfallprok.db --ignore-internal-stop-codons -n anviSAfallprok --num-threads 40
+
 anvi-gen-contigs-database -f SRfallprok-fixed.fa -o SRfallprok.db --ignore-internal-stop-codons -n anviSRfallprok --num-threads 40
+
 anvi-gen-contigs-database -f SSfallprok-fixed.fa -o SSfallprok.db --ignore-internal-stop-codons -n anviSSfallprok --num-threads 40
  
 anvi-run-hmms -c S3midprok.db --num-threads 40
