@@ -1,11 +1,9 @@
 # SCN_metagenome_code
 Workflow for SCN Illumina NovaSeq metagenomes
 
-
-
 fastqc *.fastq.gz -t 40
 
-#Received new fastq files of SR and SS for the "mid" samples. I need to concat the two sets together. 
+#### Received new fastq files of SR and SS for the "mid" samples. I need to concat the two sets together. 
 cat SR_S14_L002_R1_001.fastq.gz SR-LTRMidCysts-3-6-23_S2_L003_R1_001.fastq.gz > SR_Mid_R1_001.fastq.gz
 
 cat SR_S14_L002_R2_001.fastq.gz SR-LTRMidCysts-3-6-23_S2_L003_R2_001.fastq.gz > SR_Mid_R2_001.fastq.gz
