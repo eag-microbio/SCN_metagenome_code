@@ -1,0 +1,120 @@
+#Antismash 
+#Emily A Green PhD
+
+#in /local/workdir/eag252/
+mkdir antismash_trial
+cd antismash_trial
+
+mkdir input
+mkdir output
+
+
+#Copy prokaryote assembly fasta files over. 
+cp /workdir/eag252/cystmetagenome_all/S3_Midassembly/S3_midprok.fasta /workdir/eag252/antismash_trial/input/
+cp /workdir/eag252/cystmetagenome_all/SA_Midassembly/SA_midprok.fasta /workdir/eag252/antismash_trial/input/
+cp /workdir/eag252/cystmetagenome_all/SR_Midassembly/SR_midprok.fasta /workdir/eag252/antismash_trial/input/
+cp /workdir/eag252/cystmetagenome_all/SS_Midassembly/SS_midprok.fasta /workdir/eag252/antismash_trial/input/
+cp /workdir/eag252/cystmetagenome_all/S3_Fallassembly/S3_fallprok.fasta /workdir/eag252/antismash_trial/input/
+cp /workdir/eag252/cystmetagenome_all/SA_Fallassembly/SA_fallprok.fasta /workdir/eag252/antismash_trial/input/
+cp /workdir/eag252/cystmetagenome_all/SR_Fallassembly/SR_fallprok.fasta /workdir/eag252/antismash_trial/input/
+cp /workdir/eag252/cystmetagenome_all/SS_Fallassembly/SS_fallprok.fasta /workdir/eag252/antismash_trial/input/
+
+
+#Rename the contigs, add the metagenome name in front. The contigs are named with the same first few letters due to the assembly package. 
+perl -p -e "s/^>/>S3midprok-/g" S3_midprok.fasta > edit_S3midprok.fasta
+perl -p -e "s/^>/>SAmidprok-/g" SA_midprok.fasta > edit_SAmidprok.fasta
+perl -p -e "s/^>/>SRmidprok-/g" SR_midprok.fasta > edit_SRmidprok.fasta
+perl -p -e "s/^>/>SSmidprok-/g" SS_midprok.fasta > edit_SSmidprok.fasta
+perl -p -e "s/^>/>S3fallprok-/g" S3_fallprok.fasta > edit_S3fallprok.fasta
+perl -p -e "s/^>/>SAfallprok-/g" SA_fallprok.fasta > edit_SAfallprok.fasta
+perl -p -e "s/^>/>SRfallprok-/g" SR_fallprok.fasta > edit_SRfallprok.fasta
+perl -p -e "s/^>/>SSfallprok-/g" SS_fallprok.fasta > edit_SSfallprok.fasta
+
+
+#Copy eukaryotic contigs files over.
+cp /workdir/eag252/cystmetagenome_all/S3_Midassembly/S3_mideuk.fasta /workdir/eag252/antismash_trial/input/
+cp /workdir/eag252/cystmetagenome_all/SA_Midassembly/SA_mideuk.fasta /workdir/eag252/antismash_trial/input/
+cp /workdir/eag252/cystmetagenome_all/SR_Midassembly/SR_mideuk.fasta /workdir/eag252/antismash_trial/input/
+cp /workdir/eag252/cystmetagenome_all/SS_Midassembly/SS_mideuk.fasta /workdir/eag252/antismash_trial/input/
+cp /workdir/eag252/cystmetagenome_all/S3_Fallassembly/S3_falleuk.fasta /workdir/eag252/antismash_trial/input/
+cp /workdir/eag252/cystmetagenome_all/SA_Fallassembly/SA_falleuk.fasta /workdir/eag252/antismash_trial/input/
+cp /workdir/eag252/cystmetagenome_all/SR_Fallassembly/SR_falleuk.fasta /workdir/eag252/antismash_trial/input/
+cp /workdir/eag252/cystmetagenome_all/SS_Fallassembly/SS_falleuk.fasta /workdir/eag252/antismash_trial/input/
+
+#Rename the contigs, add the metagenome name in front. 
+perl -p -e "s/^>/>S3mideuk-/g" S3_mideuk.fasta > edit_S3mideuk.fasta
+perl -p -e "s/^>/>SAmideuk-/g" SA_mideuk.fasta > edit_SAmideuk.fasta
+perl -p -e "s/^>/>SRmideuk-/g" SR_mideuk.fasta > edit_SRmideuk.fasta
+perl -p -e "s/^>/>SSmideuk-/g" SS_mideuk.fasta > edit_SSmideuk.fasta
+perl -p -e "s/^>/>S3falleuk-/g" S3_falleuk.fasta > edit_S3falleuk.fasta
+perl -p -e "s/^>/>SAfalleuk-/g" SA_falleuk.fasta > edit_SAfalleuk.fasta
+perl -p -e "s/^>/>SRfalleuk-/g" SR_falleuk.fasta > edit_SRfalleuk.fasta
+perl -p -e "s/^>/>SSfalleuk-/g" SS_falleuk.fasta > edit_SSfalleuk.fasta
+
+
+#prodigal-m is for metagenomes
+/programs/antismash-7.1/run_antismash /workdir/eag252/antismash_trial/input/edit_S3midprok.fasta /workdir/eag252/antismash_trial/output/ --genefinding-tool prodigal-m -c 100 -t bacteria --output-basename S3mid-prok
+/programs/antismash-7.1/run_antismash /workdir/eag252/antismash_trial/input/edit_SAmidprok.fasta /workdir/eag252/antismash_trial/output/ --genefinding-tool prodigal-m -c 24 -t bacteria --output-basename SAmid-prok
+/programs/antismash-7.1/run_antismash /workdir/eag252/antismash_trial/input/edit_SRmidprok.fasta /workdir/eag252/antismash_trial/output/ --genefinding-tool prodigal-m -c 24 -t bacteria --output-basename SRmid-prok
+/programs/antismash-7.1/run_antismash /workdir/eag252/antismash_trial/input/edit_SSmidprok.fasta /workdir/eag252/antismash_trial/output/ --genefinding-tool prodigal-m -c 24 -t bacteria --output-basename SSmid-prok
+/programs/antismash-7.1/run_antismash /workdir/eag252/antismash_trial/input/edit_S3fallprok.fasta /workdir/eag252/antismash_trial/output/ --genefinding-tool prodigal-m -c 24 -t bacteria --output-basename S3fall-prok
+/programs/antismash-7.1/run_antismash /workdir/eag252/antismash_trial/input/edit_SAfallprok.fasta /workdir/eag252/antismash_trial/output/ --genefinding-tool prodigal-m -c 24 -t bacteria --output-basename SAfall-prok
+/programs/antismash-7.1/run_antismash /workdir/eag252/antismash_trial/input/edit_SRfallprok.fasta /workdir/eag252/antismash_trial/output/ --genefinding-tool prodigal-m -c 24 -t bacteria --output-basename SRfall-prok
+/programs/antismash-7.1/run_antismash /workdir/eag252/antismash_trial/input/edit_SSfallprok.fasta /workdir/eag252/antismash_trial/output/ --genefinding-tool prodigal-m -c 24 -t bacteria --output-basename SSfall-prok
+
+
+#eukaryotic- must use glimmerhmm for fungi
+/programs/antismash-7.1/run_antismash /workdir/eag252/antismash_trial/input/edit_S3mideuk.fasta /workdir/eag252/antismash_trial/output/ --genefinding-tool glimmerhmm -c 24 -t fungi --output-basename S3mid-euk
+/programs/antismash-7.1/run_antismash /workdir/eag252/antismash_trial/input/edit_SAmideuk.fasta /workdir/eag252/antismash_trial/output/ --genefinding-tool glimmerhmm -c 24 -t fungi --output-basename SAmid-euk
+/programs/antismash-7.1/run_antismash /workdir/eag252/antismash_trial/input/edit_SRmideuk.fasta /workdir/eag252/antismash_trial/output/ --genefinding-tool glimmerhmm -c 24 -t fungi --output-basename SRmid-euk
+/programs/antismash-7.1/run_antismash /workdir/eag252/antismash_trial/input/edit_SSmideuk.fasta /workdir/eag252/antismash_trial/output/ --genefinding-tool glimmerhmm -c 24 -t fungi --output-basename SSmid-euk
+/programs/antismash-7.1/run_antismash /workdir/eag252/antismash_trial/input/edit_S3falleuk.fasta /workdir/eag252/antismash_trial/output/ --genefinding-tool glimmerhmm -c 24 -t fungi --output-basename S3fall-euk
+/programs/antismash-7.1/run_antismash /workdir/eag252/antismash_trial/input/edit_SAfalleuk.fasta /workdir/eag252/antismash_trial/output/ --genefinding-tool glimmerhmm -c 24 -t fungi --output-basename SAfall-euk
+/programs/antismash-7.1/run_antismash /workdir/eag252/antismash_trial/input/edit_SRfalleuk.fasta /workdir/eag252/antismash_trial/output/ --genefinding-tool glimmerhmm -c 24 -t fungi --output-basename SRfall-euk
+/programs/antismash-7.1/run_antismash /workdir/eag252/antismash_trial/input/edit_SSfalleuk.fasta /workdir/eag252/antismash_trial/output/ --genefinding-tool glimmerhmm -c 24 -t fungi --output-basename SSfall-euk
+
+
+
+#BigScape for viewing clusters of the antismash data
+# In my experience, these need to be exported to your own computer to be viewed. The .html link doesn't load if it isn't moved off the server. 
+
+#running in /local/workdir/eag252/antismash_trial
+
+/programs/bigscape/run_bigscape output/S3mid-prok/ bigscape_output/S3mid-prok
+/programs/bigscape/run_bigscape output/SAmid-prok/ bigscape_output/SAmid-prok
+/programs/bigscape/run_bigscape output/SRmid-prok/ bigscape_output/SRmid-prok
+/programs/bigscape/run_bigscape output/SSmid-prok/ bigscape_output/SSmid-prok
+/programs/bigscape/run_bigscape output/S3fall-prok/ bigscape_output/S3fall-prok
+/programs/bigscape/run_bigscape output/SAfall-prok/ bigscape_output/SAfall-prok
+/programs/bigscape/run_bigscape output/SRfall-prok/ bigscape_output/SRfall-prok
+/programs/bigscape/run_bigscape output/SSfall-prok/ bigscape_output/SSfall-prok
+
+/programs/bigscape/run_bigscape output/S3mid-euk/ bigscape_output/S3mid-euk
+/programs/bigscape/run_bigscape output/SAmid-euk/ bigscape_output/SAmid-euk
+/programs/bigscape/run_bigscape output/SRmid-euk/ bigscape_output/SRmid-euk
+/programs/bigscape/run_bigscape output/SSmid-euk/ bigscape_output/SSmid-euk
+/programs/bigscape/run_bigscape output/S3fall-euk/ bigscape_output/S3fall-euk
+/programs/bigscape/run_bigscape output/SAfall-euk/ bigscape_output/SAfall-euk
+/programs/bigscape/run_bigscape output/SRfall-euk/ bigscape_output/SRfall-euk
+/programs/bigscape/run_bigscape output/SSfall-euk/ bigscape_output/SSfall-euk
+
+
+
+#in /local/workdir/eag252/antismash_trial/output
+mkdir All_Fall_Samples_Prokaryote
+cp S3fall-prok/* All_Fall_Samples_Prokaryote/
+cp SAfall-prok/* All_Fall_Samples_Prokaryote/
+cp SRfall-prok/* All_Fall_Samples_Prokaryote/
+cp SSfall-prok/* All_Fall_Samples_Prokaryote/
+
+
+mkdir All_Mid_Samples_Prokaryote
+cp S3mid-prok/* All_Mid_Samples_Prokaryote/
+cp SAmid-prok/* All_Mid_Samples_Prokaryote/
+cp SRmid-prok/* All_Mid_Samples_Prokaryote/
+cp SSmid-prok/* All_Mid_Samples_Prokaryote/
+
+
+/programs/bigscape/run_bigscape output/All_Fall_Samples_Prokaryote bigscape_output/All_Fall_Prokaryote
+
+/programs/bigscape/run_bigscape output/All_Mid_Samples_Prokaryote bigscape_output/All_Mid_Prokaryote
