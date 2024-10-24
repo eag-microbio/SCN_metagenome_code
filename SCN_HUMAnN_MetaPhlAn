@@ -1,0 +1,222 @@
+#Emily A Green, PhD
+
+#Originally run in /local/workdir/eag252/humann
+
+#HUMAnN 3.0 https://github.com/biobakery/humann
+#recommended uniref90_diamond 
+
+#This will run humann 3.0,  https://biohpc.cornell.edu/lab/userguide.aspx?a=software&i=855#c
+
+export PYTHONPATH=/programs/metaphlan-4.0.6/lib/python3.9/site-packages:/programs/metaphlan-4.0.6/lib64/python3.9/site-packages
+export PATH=/programs/metaphlan-4.0.6/bin:$PATH
+export PYTHONPATH=/programs/humann-3.7/lib/python3.9/site-packages:$PYTHONPATH
+export PATH=/programs/humann-3.7/bin:/programs/diamond:$PATH
+
+#download chocophlan database
+humann_databases --download chocophlan full /workdir/eag252/humann/
+#download uniref database
+humann_databases --download uniref uniref90_ec_filtered_diamond  /workdir/eag252/humann/
+
+
+#Need to concatenate the forward and reverse reads for the metagenome
+#https://forum.biobakery.org/t/humann3-paired-end-reads/862
+#Using the SCN/Soybean filtered fastq files. 
+cat /workdir/eag252/cystmetagenome_all/S3cystsmid_R1.fastq.gz /workdir/eag252/cystmetagenome_all/S3cystsmid_R2.fastq.gz > S3cystsmid_Both.fastq.gz
+
+humann -i S3cystsmid_Both.fastq.gz --input-format fastq -o S3mid_Test4 --nucleotide-database /workdir/eag252/humann/chocophlan/ --protein-database /workdir/eag252/humann/uniref/ --metaphlan-options="--bowtie2db /workdir/eag252/humann/chocophlan" --threads 30 --output-max-decimals 2
+
+
+#Put the names to the features instead of uniref codes 
+#copies per million
+humann_renorm_table --input S3mid_Test4/S3cystsmid_Both_genefamilies.tsv --output S3mid_Test4/S3cystsmid_genefamilies_cpm.tsv --units cpm --update-snames
+
+
+grep -v "#" S3mid_Test4/S3cystsmid_genefamilies_cpm.tsv | grep -v "|" | cut -f2 | paste -s -d+ - | bc
+
+
+#Regrouping genes to other functional categories
+humann_regroup_table --input S3mid_Test4/S3cystsmid_genefamilies_cpm.tsv --output S3mid_Test4/S3cystsmid_rxn_cpm.tsv --groups uniref90_rxn
+
+
+grep -v "#" S3mid_Test4/S3cystsmid_rxn_cpm.tsv | grep -v "|" | cut -f2 | paste -s -d+ - | bc
+
+#Attaching names to features
+humann_rename_table --input S3mid_Test4/S3cystsmid_rxn_cpm.tsv --output S3mid_Test4/S3cystsmid_rxn_cpm_named.tsv --names metacyc-rxn
+
+
+#Concatenate the forward and reverse reads. 
+cat /workdir/eag252/cystmetagenome_all/SAcystsmid_R1.fastq.gz /workdir/eag252/cystmetagenome_all/SAcystsmid_R2.fastq.gz > SAcystsmid_Both.fastq.gz
+cat /workdir/eag252/cystmetagenome_all/SRcystsmid_R1.fastq.gz /workdir/eag252/cystmetagenome_all/SRcystsmid_R2.fastq.gz > SRcystsmid_Both.fastq.gz
+cat /workdir/eag252/cystmetagenome_all/SScystsmid_R1.fastq.gz /workdir/eag252/cystmetagenome_all/SScystsmid_R2.fastq.gz > SScystsmid_Both.fastq.gz
+cat /workdir/eag252/cystmetagenome_all/S3cystsfall_R1.fastq.gz /workdir/eag252/cystmetagenome_all/S3cystsfall_R2.fastq.gz > S3cystsfall_Both.fastq.gz
+cat /workdir/eag252/cystmetagenome_all/SAcystsfall_R1.fastq.gz /workdir/eag252/cystmetagenome_all/SAcystsfall_R2.fastq.gz > SAcystsfall_Both.fastq.gz
+cat /workdir/eag252/cystmetagenome_all/SRcystsfall_R1.fastq.gz /workdir/eag252/cystmetagenome_all/SRcystsfall_R2.fastq.gz > SRcystsfall_Both.fastq.gz
+cat /workdir/eag252/cystmetagenome_all/SScystsfall_R1.fastq.gz /workdir/eag252/cystmetagenome_all/SScystsfall_R2.fastq.gz > SScystsfall_Both.fastq.gz
+
+#unzip files
+
+#Run Humann on each of the metagenomes. 
+humann -i SAcystsmid_Both.fastq --input-format fastq -o SAmid --nucleotide-database /workdir/eag252/humann/chocophlan/ --protein-database /workdir/eag252/humann/uniref/ --metaphlan-options="--bowtie2db /workdir/eag252/humann/chocophlan" --threads 30 --output-max-decimals 2
+
+humann -i SRcystsmid_Both.fastq --input-format fastq -o SRmid --nucleotide-database /workdir/eag252/humann/chocophlan/ --protein-database /workdir/eag252/humann/uniref/ --metaphlan-options="--bowtie2db /workdir/eag252/humann/chocophlan" --threads 30 --output-max-decimals 2
+
+humann -i SScystsmid_Both.fastq --input-format fastq -o SSmid --nucleotide-database /workdir/eag252/humann/chocophlan/ --protein-database /workdir/eag252/humann/uniref/ --metaphlan-options="--bowtie2db /workdir/eag252/humann/chocophlan" --threads 30 --output-max-decimals 2
+
+humann -i S3cystsfall_Both.fastq --input-format fastq -o S3fall --nucleotide-database /workdir/eag252/humann/chocophlan/ --protein-database /workdir/eag252/humann/uniref/ --metaphlan-options="--bowtie2db /workdir/eag252/humann/chocophlan" --threads 30 --output-max-decimals 2
+
+humann -i SAcystsfall_Both.fastq --input-format fastq -o SAfall --nucleotide-database /workdir/eag252/humann/chocophlan/ --protein-database /workdir/eag252/humann/uniref/ --metaphlan-options="--bowtie2db /workdir/eag252/humann/chocophlan" --threads 30 --output-max-decimals 2
+
+humann -i SRcystsfall_Both.fastq --input-format fastq -o SRfall --nucleotide-database /workdir/eag252/humann/chocophlan/ --protein-database /workdir/eag252/humann/uniref/ --metaphlan-options="--bowtie2db /workdir/eag252/humann/chocophlan" --threads 30 --output-max-decimals 2
+
+humann -i SScystsfall_Both.fastq --input-format fastq -o SSfall --nucleotide-database /workdir/eag252/humann/chocophlan/ --protein-database /workdir/eag252/humann/uniref/ --metaphlan-options="--bowtie2db /workdir/eag252/humann/chocophlan" --threads 30 --output-max-decimals 2
+
+
+#Using Copies per million. 
+#Put the names to the features instead of uniref codes 
+humann_renorm_table --input SAmid/SAcystsmid_Both_genefamilies.tsv --output SAmid/SAcystsmid_genefamilies_cpm.tsv --units cpm --update-snames
+grep -v "#" SAmid/SAcystsmid_genefamilies_cpm.tsv | grep -v "|" | cut -f2 | paste -s -d+ - | bc
+
+#Regrouping genes to other functional categories
+humann_regroup_table --input SAmid/SAcystsmid_genefamilies_cpm.tsv --output SAmid/SAcystsmid_rxn_cpm.tsv --groups uniref90_rxn
+grep -v "#" SAmid/SAcystsmid_rxn_cpm.tsv | grep -v "|" | cut -f2 | paste -s -d+ - | bc
+
+#Attaching names to features
+humann_rename_table --input SAmid/SAcystsmid_rxn_cpm.tsv --output SAmid/SAcystsmid_rxn_cpm_named.tsv --names metacyc-rxn
+
+
+humann_renorm_table --input SRmid/SRcystsmid_Both_genefamilies.tsv --output SRmid/SRcystsmid_genefamilies_cpm.tsv --units cpm --update-snames
+grep -v "#" SRmid/SRcystsmid_genefamilies_cpm.tsv | grep -v "|" | cut -f2 | paste -s -d+ - | bc
+humann_regroup_table --input SRmid/SRcystsmid_genefamilies_cpm.tsv --output SRmid/SRcystsmid_rxn_cpm.tsv --groups uniref90_rxn
+grep -v "#" SRmid/SRcystsmid_rxn_cpm.tsv | grep -v "|" | cut -f2 | paste -s -d+ - | bc
+humann_rename_table --input SRmid/SRcystsmid_rxn_cpm.tsv --output SRmid/SRcystsmid_rxn_cpm_named.tsv --names metacyc-rxn
+
+humann_renorm_table --input SSmid/SScystsmid_Both_genefamilies.tsv --output SSmid/SScystsmid_genefamilies_cpm.tsv --units cpm --update-snames
+grep -v "#" SSmid/SScystsmid_genefamilies_cpm.tsv | grep -v "|" | cut -f2 | paste -s -d+ - | bc
+humann_regroup_table --input SSmid/SScystsmid_genefamilies_cpm.tsv --output SSmid/SScystsmid_rxn_cpm.tsv --groups uniref90_rxn
+grep -v "#" SSmid/SScystsmid_rxn_cpm.tsv | grep -v "|" | cut -f2 | paste -s -d+ - | bc
+humann_rename_table --input SSmid/SScystsmid_rxn_cpm.tsv --output SSmid/SScystsmid_rxn_cpm_named.tsv --names metacyc-rxn
+
+humann_renorm_table --input S3fall/S3cystsfall_Both_genefamilies.tsv --output S3fall/S3cystsfall_genefamilies_cpm.tsv --units cpm --update-snames
+grep -v "#" S3fall/S3cystsfall_genefamilies_cpm.tsv | grep -v "|" | cut -f2 | paste -s -d+ - | bc
+humann_regroup_table --input S3fall/S3cystsfall_genefamilies_cpm.tsv --output S3fall/S3cystsfall_rxn_cpm.tsv --groups uniref90_rxn
+grep -v "#" S3fall/S3cystsfall_rxn_cpm.tsv | grep -v "|" | cut -f2 | paste -s -d+ - | bc
+humann_rename_table --input S3fall/S3cystsfall_rxn_cpm.tsv --output S3fall/S3cystsfall_rxn_cpm_named.tsv --names metacyc-rxn
+
+humann_renorm_table --input SAfall/SAcystsfall_Both_genefamilies.tsv --output SAfall/SAcystsfall_genefamilies_cpm.tsv --units cpm --update-snames
+grep -v "#" SAfall/SAcystsfall_genefamilies_cpm.tsv | grep -v "|" | cut -f2 | paste -s -d+ - | bc
+humann_regroup_table --input SAfall/SAcystsfall_genefamilies_cpm.tsv --output SAfall/SAcystsfall_rxn_cpm.tsv --groups uniref90_rxn
+grep -v "#" SAfall/SAcystsfall_rxn_cpm.tsv | grep -v "|" | cut -f2 | paste -s -d+ - | bc
+humann_rename_table --input SAfall/SAcystsfall_rxn_cpm.tsv --output SAfall/SAcystsfall_rxn_cpm_named.tsv --names metacyc-rxn
+
+humann_renorm_table --input SRfall/SRcystsfall_Both_genefamilies.tsv --output SRfall/SRcystsfall_genefamilies_cpm.tsv --units cpm --update-snames
+grep -v "#" SRfall/SRcystsfall_genefamilies_cpm.tsv | grep -v "|" | cut -f2 | paste -s -d+ - | bc
+humann_regroup_table --input SRfall/SRcystsfall_genefamilies_cpm.tsv --output SRfall/SRcystsfall_rxn_cpm.tsv --groups uniref90_rxn
+grep -v "#" SRfall/SRcystsfall_rxn_cpm.tsv | grep -v "|" | cut -f2 | paste -s -d+ - | bc
+humann_rename_table --input SRfall/SRcystsfall_rxn_cpm.tsv --output SRfall/SRcystsfall_rxn_cpm_named.tsv --names metacyc-rxn
+
+humann_renorm_table --input SSfall/SScystsfall_Both_genefamilies.tsv --output SSfall/SScystsfall_genefamilies_cpm.tsv --units cpm --update-snames
+grep -v "#" SSfall/SScystsfall_genefamilies_cpm.tsv | grep -v "|" | cut -f2 | paste -s -d+ - | bc
+humann_regroup_table --input SSfall/SScystsfall_genefamilies_cpm.tsv --output SSfall/SScystsfall_rxn_cpm.tsv --groups uniref90_rxn
+grep -v "#" SSfall/SScystsfall_rxn_cpm.tsv | grep -v "|" | cut -f2 | paste -s -d+ - | bc
+humann_rename_table --input SSfall/SScystsfall_rxn_cpm.tsv --output SSfall/SScystsfall_rxn_cpm_named.tsv --names metacyc-rxn
+
+
+
+
+
+
+#On github for Maaslin2: Look under: Standard workflow, then to 2. Normalize the abundance output files
+#Redo the humann_renorm_table and make "--units relab" instead of "--units cpm"
+#Section 3.4 MaAsLin 2 on functional profiles says the CPM would be ok, but relative abundance would be more manageable. Other people are also using relative abundance.  
+
+#Put the names to the features instead of uniref codes 
+humann_renorm_table --input S3mid_Test4/S3cystsmid_Both_genefamilies.tsv --output S3mid_Test4/S3cystsmid_genefamilies_relab.tsv --units relab --update-snames
+
+grep -v "#" S3mid_Test4/S3cystsmid_genefamilies_relab.tsv | grep -v "|" | cut -f2 | paste -s -d+ - | bc
+
+#Regrouping genes to other functional categories
+humann_regroup_table --input S3mid_Test4/S3cystsmid_genefamilies_relab.tsv --output S3mid_Test4/S3cystsmid_rxn_relab.tsv --groups uniref90_rxn
+
+grep -v "#" S3mid_Test4/S3cystsmid_rxn_relab.tsv | grep -v "|" | cut -f2 | paste -s -d+ - | bc
+
+#Attach names to features
+humann_rename_table --input S3mid_Test4/S3cystsmid_rxn_relab.tsv --output S3mid_Test4/S3cystsmid_rxn_relab_named.tsv --names metacyc-rxn
+
+
+
+humann_renorm_table --input SAmid/SAcystsmid_Both_genefamilies.tsv --output SAmid/SAcystsmid_genefamilies_relab.tsv --units relab --update-snames
+grep -v "#" SAmid/SAcystsmid_genefamilies_relab.tsv | grep -v "|" | cut -f2 | paste -s -d+ - | bc
+humann_regroup_table --input SAmid/SAcystsmid_genefamilies_relab.tsv --output SAmid/SAcystsmid_rxn_relab.tsv --groups uniref90_rxn
+grep -v "#" SAmid/SAcystsmid_rxn_relab.tsv | grep -v "|" | cut -f2 | paste -s -d+ - | bc
+humann_rename_table --input SAmid/SAcystsmid_rxn_relab.tsv --output SAmid/SAcystsmid_rxn_relab_named.tsv --names metacyc-rxn
+
+humann_renorm_table --input SRmid/SRcystsmid_Both_genefamilies.tsv --output SRmid/SRcystsmid_genefamilies_relab.tsv --units relab --update-snames
+grep -v "#" SRmid/SRcystsmid_genefamilies_relab.tsv | grep -v "|" | cut -f2 | paste -s -d+ - | bc
+humann_regroup_table --input SRmid/SRcystsmid_genefamilies_relab.tsv --output SRmid/SRcystsmid_rxn_relab.tsv --groups uniref90_rxn
+grep -v "#" SRmid/SRcystsmid_rxn_relab.tsv | grep -v "|" | cut -f2 | paste -s -d+ - | bc
+humann_rename_table --input SRmid/SRcystsmid_rxn_relab.tsv --output SRmid/SRcystsmid_rxn_relab_named.tsv --names metacyc-rxn
+
+humann_renorm_table --input SSmid/SScystsmid_Both_genefamilies.tsv --output SSmid/SScystsmid_genefamilies_relab.tsv --units relab --update-snames
+grep -v "#" SSmid/SScystsmid_genefamilies_relab.tsv | grep -v "|" | cut -f2 | paste -s -d+ - | bc
+humann_regroup_table --input SSmid/SScystsmid_genefamilies_relab.tsv --output SSmid/SScystsmid_rxn_relab.tsv --groups uniref90_rxn
+grep -v "#" SSmid/SScystsmid_rxn_relab.tsv | grep -v "|" | cut -f2 | paste -s -d+ - | bc
+humann_rename_table --input SSmid/SScystsmid_rxn_relab.tsv --output SSmid/SScystsmid_rxn_relab_named.tsv --names metacyc-rxn
+
+humann_renorm_table --input S3fall/S3cystsfall_Both_genefamilies.tsv --output S3fall/S3cystsfall_genefamilies_relab.tsv --units relab --update-snames
+grep -v "#" S3fall/S3cystsfall_genefamilies_relab.tsv | grep -v "|" | cut -f2 | paste -s -d+ - | bc
+humann_regroup_table --input S3fall/S3cystsfall_genefamilies_relab.tsv --output S3fall/S3cystsfall_rxn_relab.tsv --groups uniref90_rxn
+grep -v "#" S3fall/S3cystsfall_rxn_relab.tsv | grep -v "|" | cut -f2 | paste -s -d+ - | bc
+humann_rename_table --input S3fall/S3cystsfall_rxn_relab.tsv --output S3fall/S3cystsfall_rxn_relab_named.tsv --names metacyc-rxn
+
+humann_renorm_table --input SAfall/SAcystsfall_Both_genefamilies.tsv --output SAfall/SAcystsfall_genefamilies_relab.tsv --units relab --update-snames
+grep -v "#" SAfall/SAcystsfall_genefamilies_relab.tsv | grep -v "|" | cut -f2 | paste -s -d+ - | bc
+humann_regroup_table --input SAfall/SAcystsfall_genefamilies_relab.tsv --output SAfall/SAcystsfall_rxn_relab.tsv --groups uniref90_rxn
+grep -v "#" SAfall/SAcystsfall_rxn_relab.tsv | grep -v "|" | cut -f2 | paste -s -d+ - | bc
+humann_rename_table --input SAfall/SAcystsfall_rxn_relab.tsv --output SAfall/SAcystsfall_rxn_relab_named.tsv --names metacyc-rxn
+
+humann_renorm_table --input SRfall/SRcystsfall_Both_genefamilies.tsv --output SRfall/SRcystsfall_genefamilies_relab.tsv --units relab --update-snames
+grep -v "#" SRfall/SRcystsfall_genefamilies_relab.tsv | grep -v "|" | cut -f2 | paste -s -d+ - | bc
+humann_regroup_table --input SRfall/SRcystsfall_genefamilies_relab.tsv --output SRfall/SRcystsfall_rxn_relab.tsv --groups uniref90_rxn
+grep -v "#" SRfall/SRcystsfall_rxn_relab.tsv | grep -v "|" | cut -f2 | paste -s -d+ - | bc
+humann_rename_table --input SRfall/SRcystsfall_rxn_relab.tsv --output SRfall/SRcystsfall_rxn_relab_named.tsv --names metacyc-rxn
+
+humann_renorm_table --input SSfall/SScystsfall_Both_genefamilies.tsv --output SSfall/SScystsfall_genefamilies_relab.tsv --units relab --update-snames
+grep -v "#" SSfall/SScystsfall_genefamilies_relab.tsv | grep -v "|" | cut -f2 | paste -s -d+ - | bc
+humann_regroup_table --input SSfall/SScystsfall_genefamilies_relab.tsv --output SSfall/SScystsfall_rxn_relab.tsv --groups uniref90_rxn
+grep -v "#" SSfall/SScystsfall_rxn_relab.tsv | grep -v "|" | cut -f2 | paste -s -d+ - | bc
+humann_rename_table --input SSfall/SScystsfall_rxn_relab.tsv --output SSfall/SScystsfall_rxn_relab_named.tsv --names metacyc-rxn
+
+
+
+#Notes
+#Stratified files- have the gene name & the taxonomy
+#Unstratified files- just have the gene name and total counts for each gene
+#https://github.com/biobakery/biobakery/wiki/maaslin2
+#https://github.com/biobakery/humann#humann_split_stratified_table
+
+
+
+
+
+
+#Metaphlan taxonomy 
+
+# /local/workdir/eag252/metaphlan
+
+#mkdir metaphlan 
+
+#Humann saves an output of the taxonomy & relative abundance that is created by the program metaphlan. The file is within the "_humann_temp" folder that is created while running humann. The metaphlan output is the "metaphlan_bugs_list.tsv" 
+#I can merge them together so that I can have a table with all the taxonomy & relative abundances of the 8 metagenomes. 
+
+merge_metaphlan_tables.py /workdir/eag252/humann/S3mid_Test4/S3cystsmid_Both_humann_temp/S3cystsmid_Both_metaphlan_bugs_list.tsv  /workdir/eag252/humann/SAmid/SAcystsmid_Both_humann_temp/SAcystsmid_Both_metaphlan_bugs_list.tsv /workdir/eag252/humann/SRmid/SRcystsmid_Both_humann_temp/SRcystsmid_Both_metaphlan_bugs_list.tsv /workdir/eag252/humann/SSmid/SScystsmid_Both_humann_temp/SScystsmid_Both_metaphlan_bugs_list.tsv /workdir/eag252/humann/S3fall/S3cystsfall_Both_humann_temp/S3cystsfall_Both_metaphlan_bugs_list.tsv /workdir/eag252/humann/SAfall/SAcystsfall_Both_humann_temp/SAcystsfall_Both_metaphlan_bugs_list.tsv /workdir/eag252/humann/SRfall/SRcystsfall_Both_humann_temp/SRcystsfall_Both_metaphlan_bugs_list.tsv /workdir/eag252/humann/SSfall/SScystsfall_Both_humann_temp/SScystsfall_Both_metaphlan_bugs_list.tsv > AllCysts_MergedBugsList.tsv
+
+
+
+#The AllCysts_MergedBugsList.tsv was reformatted in excel to make the OTU table and Tax table to import into R.
+#Workspace: EAG_16S_Metagenome_FinalWorkspace.RData
+#Code: EAG_16S_Metagenome_FinalCode.R
+#Sections of Code are named: " #Cyst Metagenome- Import Metaphlan Taxonomy files" 
+#MetaphlanBugsList_OTUTable_Genus.csv and MetaphlanBugsList_TaxaTable_Genus.csv were used to make the phyloseq object needed. 
+
+
+#Files are copied to the one drive folder:  /Emily_shared/Cyst Metagenome/MetaPHLan/
